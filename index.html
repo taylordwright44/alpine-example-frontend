@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpine Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/pinecone-router@4.x.x/dist/router.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+
+    <!-- navbar -->
+    <nav class="bg-gray-800 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-white text-xl font-semibold">App</div>
+            <div class="space-x-4">
+                <a href="/users" class="text-white hover:text-gray-300">Users</a>
+                <a href="/" class="text-white hover:text-gray-300">Home</a>
+                <!-- the profile is just hardcoded obviously, I didn't make a profile API -->
+                <a href="/users/3" class="text-white hover:text-gray-300">Profile</a> 
+            </div>
+        </div>
+    </nav>
+
+    <!-- the app stuff, I do the routing in here -->
+    <div class="container mx-auto mt-8 p-4" id="app" x-data="app">
+
+            <!-- Homepage -->
+            <template x-route="/">
+                <!-- In the template you need a wrapper with some x-data or for some reason it'll only read the first element -->
+                <div x-data="home-route"> 
+                    <h1 class="text-3xl font-bold mb-4">Home</h1>
+                    <h2 class="text-lg text-gray-700">My example app of Alpine routing and fetching, made with a single HTML page</h2>
+                    <span>ToDo: Fix router data not updating when swapping URL parameters, collapsable sidebar to show off how easy Alpine makes creating sidebars</span>
+
+                </div>
+            </template>
+
+            <!-- Users Template -->
+            <template x-route="/users">
+                
+                <!-- Example of fetching from an API -->
+                <div x-data="{users: []}" x-init="users = await (await fetch('https://jsonplaceholder.typicode.com/users')).json()">
+                    <h1 class="text-3xl font-bold mb-4" >Profiles</h1>
+                    <!-- x-for template to turn the fetched data into an HTML list. -->
+                    <template x-for="user in users">
+                        <div class="max-w-sm rounded overflow-hidden shadow-lg m-4">
+                            <img class="w-full h-40 object-cover" :src="'https://source.unsplash.com/random/' + user.id" alt="User Image">
+                            <div class="px-6 py-4">
+                                <div class="font-bold text-xl mb-2" x-text="user.name"></div>
+                                <p class="text-gray-700" x-text="user.email"></p>
+                                <a x-bind:href="`users/${user.id}`" ><button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View</button></a>
+                                
+                            </div>
+                        </div>
+                    </template> 
+                </div>
+    
+            </template>
+
+            <!-- Get individual user profile -->
+            <template x-route="/users/:id">
+                <div x-data="{user: []}" x-init="user = await (await fetch(`https://jsonplaceholder.typicode.com/users/${$router.params.id}`)).json()">
+                    <!-- If a user is found -->
+                    <template x-if="user.id">
+                        <div>
+                            <img class="w-half h-40 " :src="'https://source.unsplash.com/random/' + user.id" alt="User Image">
+                            <h1 class="text-3xl font-bold mb-4" x-text="user.name"></h1>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h2 class="text-xl font-semibold mb-2">Contact Information</h2>
+                                    <p>Email: <span x-text="user.email"></span></p>
+                                    <p>Phone: <span x-text="user.phone"></span></p>
+                                    <p>Website: <span x-text="user.website"></span></p>
+                                </div>
+
+                                <div>
+                                    <h2 class="text-xl font-semibold mb-2">Address</h2>
+                                    <p><span x-text="user.address.suite"></span>, <span x-text="user.address.street"></span></p>
+                                    <p><span x-text="user.address.city"></span>, <span x-text="user.address.zipcode"></span></p>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <h2 class="text-xl font-semibold mb-2">Company</h2>
+                                <p><span x-text="user.company.name"></span></p>
+                                <p><span x-text="user.company.catchPhrase"></span></p>
+                                <p><span x-text="user.company.bs"></span></p>
+                            </div>
+                        </div>
+                      </template>
+                      <!-- If there is no user found -->
+                      <template x-if="!user.id">
+                        <div>No User Found</div>
+                      </template>
+                </div>
+            </template>
+    </div>
+
+    <script>
+        //this is to make the router work.
+let app = ({
+    id: '',
+    loading: false,
+    async awaitedHandler(context) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        this.id = context.params.id
+    },
+})
+document.addEventListener('alpine:initialized', () => {
+    window.PineconeRouter.settings.basePath = '/'
+    window.PineconeRouter.settings.hash = false; // use hash routing
+});
+    </script>
+</body>
+</html>
