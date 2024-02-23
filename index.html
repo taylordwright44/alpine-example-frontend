@@ -33,7 +33,6 @@
                 <div x-data="home-route"> 
                     <h1 class="text-3xl font-bold mb-4">Home</h1>
                     <h2 class="text-lg text-gray-700">My example app of Alpine routing and fetching, made with a single HTML page</h2>
-                    <span>ToDo: Fix router data not updating when swapping URL parameters, collapsable sidebar to show off how easy Alpine makes creating sidebars</span>
 
                 </div>
             </template>
@@ -61,7 +60,7 @@
             </template>
 
             <!-- Get individual user profile -->
-            <template x-route="/users/:id">
+            <template x-route="/users/:id" x-handler="[awaitedHandler]">
                 <div x-data="{user: []}" x-init="user = await (await fetch(`https://jsonplaceholder.typicode.com/users/${$router.params.id}`)).json()">
                     <!-- If a user is found -->
                     <template x-if="user.id">
@@ -106,7 +105,7 @@ let app = ({
     id: '',
     loading: false,
     async awaitedHandler(context) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 10));
         this.id = context.params.id
     },
 })
